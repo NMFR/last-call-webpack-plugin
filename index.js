@@ -56,6 +56,7 @@ LastCallWebpackPlugin.prototype.getAssetsAndProcessors = function(assets) {
   _.each(assetNames, function (assetName) {
     _.each(assetProcessors, function(assetProcessor) {
       var regExpResult = assetProcessor.regExp.exec(assetName);
+      assetProcessor.regExp.lastIndex = 0;
       if (regExpResult) {
         var assetAndProcessor = {
           assetName: assetName,
