@@ -18,6 +18,8 @@
     "modify",
     "manipulate",
     "optimize",
+    "prefix",
+    "sufix",
     "webpack",
     "assets"
   ],
