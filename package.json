@@ -3,9 +3,18 @@
   "version": "2.0.1",
   "author": "Nuno Rodrigues",
   "description": "A Webpack plugin that allows to transform \\ modify assets just before Webpack emits them.",
+  "scripts": {
+    "test": "rm -rf ./tests/dist && NODE_ENV=production webpack -p --progress --profile --colors --config ./tests/webpack.config.js"
+  },
   "dependencies": {
     "lodash": "^4.17.4",
     "webpack-sources": "^1.0.1"
+  },
+  "devDependencies": {
+    "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.9.0",
+    "webpack": "^1.13.2"
   },
   "main": "index.js",
   "homepage": "http://github.com/NMFR/last-call-webpack-plugin",
