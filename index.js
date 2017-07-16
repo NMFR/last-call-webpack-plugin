@@ -1,10 +1,15 @@
-var _ = require('underscore');
+var assign = require('lodash/assign');
+var each = require('lodash/each');
+var isArray = require('lodash/isArray');
+var isFunction = require('lodash/isFunction');
+var isRegExp = require('lodash/isRegExp');
+var keys = require('lodash/keys');
 var webpackSources = require('webpack-sources');
 
 function emptyFunc() {};
 
 function LastCallWebpackPlugin(options) {
-  this.options = _.assign(
+  this.options = assign(
     {
       assetProcessors: [],
       onStart: emptyFunc,
@@ -14,26 +19,26 @@ function LastCallWebpackPlugin(options) {
     options || {}
   );
 
-  if (!_.isArray(this.options.assetProcessors)) {
+  if (!isArray(this.options.assetProcessors)) {
     throw new Error('LastCallWebpackPlugin Error: invalid options.assetProcessors (must be an Array).');
   }
 
-  _.each(this.options.assetProcessors, function (processor, index) {
+  each(this.options.assetProcessors, function (processor, index) {
     if (!processor) {
       throw new Error('LastCallWebpackPlugin Error: invalid options.assetProcessors[' + String(index) + '] (must be an object).');
     }
-    if (!_.isRegExp(processor.regExp)) {
+    if (!isRegExp(processor.regExp)) {
       throw new Error('LastCallWebpackPlugin Error: invalid options.assetProcessors[' + String(index) + '].regExp (must be an regular expression).');
     }
-    if (!_.isFunction(processor.processor)) {
+    if (!isFunction(processor.processor)) {
       throw new Error('LastCallWebpackPlugin Error: invalid options.assetProcessors[' + String(index) + '].processor (must be a function).');
     }
   });
 
-  if (!_.isFunction(this.options.onStart)) {
+  if (!isFunction(this.options.onStart)) {
     throw new Error('LastCallWebpackPlugin Error: invalid options.onStart (must be a function).');
   }
-  if (!_.isFunction(this.options.onEnd)) {
+  if (!isFunction(this.options.onEnd)) {
     throw new Error('LastCallWebpackPlugin Error: invalid options.onEnd (must be a function).');
   }
 };
@@ -50,11 +55,11 @@ LastCallWebpackPlugin.prototype.onAssetError = function(assetName, asset, err) {
 
 LastCallWebpackPlugin.prototype.getAssetsAndProcessors = function(assets) {
   var assetProcessors = this.options.assetProcessors;
-  var assetNames = _.keys(assets);
+  var assetNames = keys(assets);
   var assetsAndProcessors = [];
 
-  _.each(assetNames, function (assetName) {
-    _.each(assetProcessors, function(assetProcessor) {
+  each(assetNames, function (assetName) {
+    each(assetProcessors, function(assetProcessor) {
       var regExpResult = assetProcessor.regExp.exec(assetName);
       assetProcessor.regExp.lastIndex = 0;
       if (regExpResult) {
@@ -88,7 +93,7 @@ LastCallWebpackPlugin.prototype.apply = function(compiler) {
     var hasErrors = false;
     var promises = [];
 
-    _.each(assetsAndProcessors, function(assetAndProcessor) {
+    each(assetsAndProcessors, function(assetAndProcessor) {
       var asset = assets[assetAndProcessor.assetName];
       var promise = assetAndProcessor.processor(assetAndProcessor.assetName, asset)
         .then(function (result) {
