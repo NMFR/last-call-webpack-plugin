@@ -43,7 +43,7 @@ function LastCallWebpackPlugin(options) {
       throw new Error('LastCallWebpackPlugin Error: invalid options.assetProcessors[' + String(index) + '].processor (must be a function).');
     }
     if (processor.phase === undefined) {
-      processor.phase = PHASE.EMIT;
+      processor.phase = PHASE.OPTIMIZE_ASSETS;
     }
     if (!find(PHASES, function(p) { return p === processor.phase; })) {
       throw new Error('LastCallWebpackPlugin Error: invalid options.assetProcessors[' + String(index) + '].phase (must be on of: ' + PHASES.join(', ') + ').');
