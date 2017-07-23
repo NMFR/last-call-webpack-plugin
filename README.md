@@ -23,6 +23,10 @@ The plugin can receive the following options:
 * assetProcessors: An Array of objects that describe asset processors:
   * regExp: A regular expression to match the asset name that the processor handles.
   * processor: A function with the signature of ``` function(assetName, webpackAssetObject) ``` that returns a Promise. If the Promise returns a result this result will replace the assets content.
+  * phase: The webpack compilation phase that at which the processor should be called. Default value is `compilation.optimize-assets`. Can be one of the following values:
+    * `compilation.optimize-chunk-assets`
+    * `compilation.optimize-assets`
+    * `emit`
 * onStart: A function with the signature of ``` function(assets, assetsAndProcessors, webpackCompilationObject) ``` that will be called before the plugin starts calling the assets processors.
 * onEnd: A function with the signature of ``` function(error) ``` that will be called after the plugin calls all the assets processors. If no errors occurred the ``` error ``` parameter will be undefined.
 * canPrint: A boolean indicating if the plugin can print messages to the console, defaults to `true`.
