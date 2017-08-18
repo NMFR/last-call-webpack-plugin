@@ -99,6 +99,8 @@ module.exports = {
 }
 ```
 
+The `assets` object also has a `getAsset(assetName)` method to get the content of an asset (returns undefined in case the asset does not exist).
+
 ## License
 
 MIT (http://www.opensource.org/licenses/mit-license.php)
