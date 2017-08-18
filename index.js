@@ -17,6 +17,20 @@ var PHASE = {
 };
 var PHASES = values(PHASE);
 
+function AssetsManipulation(lastCallWebpackPlugin, compilation) {
+  this.lastCallWebpackPlugin = lastCallWebpackPlugin;
+  this.compilation = compilation;
+}
+
+AssetsManipulation.prototype.setAsset = function(assetName, assetValue, immediate) {
+  this.lastCallWebpackPlugin.setAsset(assetName, assetValue, immediate, this.compilation);
+};
+
+AssetsManipulation.prototype.getAsset = function(assetName) {
+  var asset = assetName && this.compilation.assets[assetName] && this.compilation.assets[assetName].source();
+  return asset || undefined;
+};
+
 function LastCallWebpackPlugin(options) {
   this.options = assign(
     {
@@ -117,11 +131,7 @@ LastCallWebpackPlugin.prototype.process = function(compilation, phase, callback)
   var hasErrors = false;
   var promises = [];
 
-  var assetsManipulationObject = {
-    setAsset: function(assetName, assetValue, immediate) {
-      self.setAsset(assetName, assetValue, immediate, compilation);
-    }
-  };
+  var assetsManipulationObject = new AssetsManipulation(self, compilation);
 
   each(assetsAndProcessors, function(assetAndProcessor) {
     var asset = compilation.assets[assetAndProcessor.assetName];
