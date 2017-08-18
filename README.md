@@ -51,7 +51,7 @@ module.exports = {
         regExp:  /\.js$/,
         processor: (assetName, asset) => Promise.resolve('// Author: John Doe \n' + asset.source())
       }, {
-				regExp:  /\.css$/,
+        regExp:  /\.css$/,
         processor: (assetName, asset) => cssnano.process(asset.source())
           .then(r => r.css)
       }],
@@ -65,7 +65,7 @@ module.exports = {
 
 ## Assets manipulation
 
-The `processor` method is supplied a `assets` object, this object can be used to manipulate other assets via the `setAsset(assetName, assetValue)` method. If you pass a `assetValue` of null that asset will be deleted. This can be used to generate aditional assets (like source maps) or rename the asset (create a new asset and delete the current one).
+The `processor` method is supplied an `assets` object that allows asset manipulation via the `setAsset(assetName, assetValue)` method. If `assetValue` is null the asset will be deleted. This object can be used to generate aditional assets (like source maps) or rename the an asset (create a new asset and delete the current one).
 
 Example:
 
@@ -82,7 +82,7 @@ module.exports = {
     new ExtractTextPlugin("styles.css"),
     new LastCallWebpackPlugin({
       assetProcessors: [{
-				regExp:  /\.css$/,
+        regExp:  /\.css$/,
         processor: (assetName, asset, assets) => {
           assets.setAsset(assetName + '.map', null); // Delete the <assetName>.map asset.
           assets.setAsset(assetName + '.log', 'All OK'); // Add the <assetName>.log asset with the content 'All OK'.
