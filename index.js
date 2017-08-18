@@ -56,7 +56,13 @@ function LastCallWebpackPlugin(options) {
   if (!isFunction(this.options.onEnd)) {
     throw new Error('LastCallWebpackPlugin Error: invalid options.onEnd (must be a function).');
   }
+
+  this.initCompile();
 };
+
+LastCallWebpackPlugin.prototype.initCompile = function() {
+  this.deleteAssetsMap = {};
+}
 
 LastCallWebpackPlugin.prototype.print = function() {
   if (this.options.canPrint) {
@@ -111,13 +117,19 @@ LastCallWebpackPlugin.prototype.process = function(compilation, phase, callback)
   var hasErrors = false;
   var promises = [];
 
+  var assetsManipulationObject = {
+    setAsset: function(assetName, assetValue, immediate) {
+      self.setAsset(assetName, assetValue, immediate, compilation);
+    }
+  };
+
   each(assetsAndProcessors, function(assetAndProcessor) {
     var asset = compilation.assets[assetAndProcessor.assetName];
     var promise = assetAndProcessor
-      .processor(assetAndProcessor.assetName, asset)
+      .processor(assetAndProcessor.assetName, asset, assetsManipulationObject)
       .then(function (result) {
         if (result !== undefined) {
-          compilation.assets[assetAndProcessor.assetName] = self.createAsset(result, asset);
+          self.setAsset(assetAndProcessor.assetName, result, false, compilation);
         }
       })
       .catch(function(err) {
@@ -139,10 +151,35 @@ LastCallWebpackPlugin.prototype.process = function(compilation, phase, callback)
     });
 };
 
+LastCallWebpackPlugin.prototype.setAsset = function(assetName, assetValue, immediate, compilation) {
+  if (assetName) {
+    if (assetValue === null) {
+      this.deleteAssetsMap[assetName] = true;
+      if (immediate) {
+        delete compilation.assets[assetName];
+      }
+    } else {
+      if (assetValue !== undefined) {
+        compilation.assets[assetName] = this.createAsset(assetValue, compilation.assets[assetName]);
+      }
+    }
+  }
+};
+
+LastCallWebpackPlugin.prototype.deleteAssets = function(compilation) {
+  if (this.deleteAssetsMap && compilation) {
+    each(keys(this.deleteAssetsMap), function(key) {
+      delete compilation.assets[key];
+    });
+  }
+};
+
 LastCallWebpackPlugin.prototype.apply = function(compiler) {
   var self = this;
 
   compiler.plugin('compilation', function(compilation, params) {
+    self.initCompile();
+
     compilation.plugin("optimize-chunk-assets", function(chunks, callback) {
       self.process(compilation, PHASE.OPTIMIZE_CHUNK_ASSETS, callback);
     });
@@ -152,6 +189,7 @@ LastCallWebpackPlugin.prototype.apply = function(compiler) {
   });
   compiler.plugin('emit', function(compilation, callback) {
     self.process(compilation, PHASE.EMIT, callback);
+    self.deleteAssets(compilation);
   });
 };
 
