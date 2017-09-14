@@ -204,5 +204,6 @@ LastCallWebpackPlugin.prototype.apply = function(compiler) {
 };
 
 LastCallWebpackPlugin.prototype.PHASE = PHASE;
+LastCallWebpackPlugin.PHASE = PHASE;
 
 module.exports = LastCallWebpackPlugin;
