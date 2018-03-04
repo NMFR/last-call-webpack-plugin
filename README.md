@@ -17,6 +17,8 @@ Using npm:
 $ npm install --save-dev last-call-webpack-plugin
 ```
 
+> :warning: For webpack v3 or below please use `last-call-webpack-plugin@v2.1.2`. The `last-call-webpack-plugin@v3.0.0` version and above supports webpack v4.
+
 ## Configuration:
 
 The plugin can receive the following options:
@@ -27,8 +29,6 @@ The plugin can receive the following options:
     * `compilation.optimize-chunk-assets`
     * `compilation.optimize-assets`
     * `emit`
-* onStart: A function with the signature of ``` function(assets, assetsAndProcessors, webpackCompilationObject) ``` that will be called before the plugin starts calling the assets processors.
-* onEnd: A function with the signature of ``` function(error) ``` that will be called after the plugin calls all the assets processors. If no errors occurred the ``` error ``` parameter will be undefined.
 * canPrint: A boolean indicating if the plugin can print messages to the console, defaults to `true`.
 
 Note: An environment supporting Promises or a Promise polyfill is needed for this plugin to be used.
@@ -47,16 +47,16 @@ module.exports = {
   plugins: [
     new ExtractTextPlugin("styles.css"),
     new LastCallWebpackPlugin({
-      assetProcessors: [{
-        regExp:  /\.js$/,
-        processor: (assetName, asset) => Promise.resolve('// Author: John Doe \n' + asset.source())
-      }, {
-        regExp:  /\.css$/,
-        processor: (assetName, asset) => cssnano.process(asset.source())
-          .then(r => r.css)
-      }],
-      onStart: () => console.log('Starting to process assets.'),
-      onEnd: (err) => console.log(err ? 'Error: ' + err : 'Finished processing assets.'),
+      assetProcessors: [
+        {
+          regExp:  /\.js$/,
+          processor: (assetName, asset) => Promise.resolve('// Author: John Doe \n' + asset.source())
+        }, {
+          regExp:  /\.css$/,
+          processor: (assetName, asset) => cssnano.process(asset.source())
+            .then(r => r.css)
+        }
+      ],
       canPrint: true
     })
 	]
@@ -91,8 +91,6 @@ module.exports = {
             .then(r => r.css)
         }
       }],
-      onStart: () => console.log('Starting to process assets.'),
-      onEnd: (err) => console.log(err ? 'Error: ' + err : 'Finished processing assets.'),
       canPrint: true
     })
 	]
