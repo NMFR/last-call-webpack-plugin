@@ -44,10 +44,19 @@ class LastCallWebpackPlugin {
       },
       options || {}
     );
+
+    this.phaseAssetProcessors = {};
+    each(PHASE_LIST, (phase)  => {
+      this.phaseAssetProcessors[phase] = [];
+    });
+
     if (!isArray(this.options.assetProcessors)) {
       throw new Error('LastCallWebpackPlugin Error: invalid options.assetProcessors (must be an Array).');
     }
-    each(this.options.assetProcessors, ensureAssetProcessor);
+    each(this.options.assetProcessors, (processor, index) => {
+      ensureAssetProcessor(processor, index);
+      this.phaseAssetProcessors[processor.phase].push(processor);
+    });
 
     this.resetInternalState();
   }
@@ -94,24 +103,22 @@ class LastCallWebpackPlugin {
   }
 
   getAssetsAndProcessors(assets, phase) {
-    const assetProcessors = this.options.assetProcessors;
+    const assetProcessors = this.phaseAssetProcessors[phase];
     const assetNames = keys(assets);
     const assetsAndProcessors = [];
 
-    each(assetNames, function (assetName) {
-      each(assetProcessors, function(assetProcessor) {
-        if (assetProcessor.phase === phase) {
-          const regExpResult = assetProcessor.regExp.exec(assetName);
-          assetProcessor.regExp.lastIndex = 0;
-          if (regExpResult) {
-            const assetAndProcessor = {
-              assetName: assetName,
-              regExp: assetProcessor.regExp,
-              processor: assetProcessor.processor,
-              regExpResult: regExpResult,
-            };
-            assetsAndProcessors.push(assetAndProcessor);
-          }
+    each(assetNames, (assetName) => {
+      each(assetProcessors, (assetProcessor) => {
+        const regExpResult = assetProcessor.regExp.exec(assetName);
+        assetProcessor.regExp.lastIndex = 0;
+        if (regExpResult) {
+          const assetAndProcessor = {
+            assetName: assetName,
+            regExp: assetProcessor.regExp,
+            processor: assetProcessor.processor,
+            regExpResult: regExpResult,
+          };
+          assetsAndProcessors.push(assetAndProcessor);
         }
       });
     });
@@ -153,26 +160,44 @@ class LastCallWebpackPlugin {
   }
 
   apply(compiler) {
+    const hasOptimizeChunkAssetsProcessors =
+      this.phaseAssetProcessors[PHASES.OPTIMIZE_CHUNK_ASSETS].length > 0;
+    const hasOptimizeAssetsProcessors =
+      this.phaseAssetProcessors[PHASES.OPTIMIZE_ASSETS].length > 0;
+    const hasEmitProcessors =
+      this.phaseAssetProcessors[PHASES.EMIT].length > 0;
+
     compiler.hooks.compilation.tap(
       this.pluginDescriptor,
       (compilation, params) => {
         this.resetInternalState();
-        compilation.hooks.optimizeChunkAssets.tapPromise(
-          this.pluginDescriptor,
-          chunks => this.process(compilation, PHASES.OPTIMIZE_CHUNK_ASSETS, { chunks: chunks })
-        );
-        compilation.hooks.optimizeAssets.tapPromise(
-          this.pluginDescriptor,
-          assets => this.process(compilation, PHASES.OPTIMIZE_ASSETS, { assets: assets })
-        );
+
+        if (hasOptimizeChunkAssetsProcessors) {
+          compilation.hooks.optimizeChunkAssets.tapPromise(
+            this.pluginDescriptor,
+            chunks => this.process(compilation, PHASES.OPTIMIZE_CHUNK_ASSETS, { chunks: chunks })
+          );
+        }
+
+        if (hasOptimizeAssetsProcessors) {
+          compilation.hooks.optimizeAssets.tapPromise(
+            this.pluginDescriptor,
+            assets => this.process(compilation, PHASES.OPTIMIZE_ASSETS, { assets: assets })
+          );
+        }
       }
     );
     compiler.hooks.emit.tapPromise(
       this.pluginDescriptor,
-      compilation => this.process(compilation, PHASES.EMIT)
-        .then((r) => {
+      compilation =>
+        (
+          hasEmitProcessors ?
+            this.process(compilation, PHASES.EMIT) :
+            Promise.resolve(undefined)
+        )
+        .then((result) => {
           this.deleteAssets(compilation);
-          return r;
+          return result;
         })
     );
   }
