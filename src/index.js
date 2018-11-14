@@ -167,39 +167,41 @@ class LastCallWebpackPlugin {
     const hasEmitProcessors =
       this.phaseAssetProcessors[PHASES.EMIT].length > 0;
 
-    compiler.hooks.compilation.tap(
-      this.pluginDescriptor,
-      (compilation, params) => {
-        this.resetInternalState();
+    if (compiler.hooks) {
+      compiler.hooks.compilation.tap(
+        this.pluginDescriptor,
+        (compilation, params) => {
+          this.resetInternalState();
 
-        if (hasOptimizeChunkAssetsProcessors) {
-          compilation.hooks.optimizeChunkAssets.tapPromise(
-            this.pluginDescriptor,
-            chunks => this.process(compilation, PHASES.OPTIMIZE_CHUNK_ASSETS, { chunks: chunks })
-          );
-        }
+          if (hasOptimizeChunkAssetsProcessors) {
+            compilation.hooks.optimizeChunkAssets.tapPromise(
+              this.pluginDescriptor,
+              chunks => this.process(compilation, PHASES.OPTIMIZE_CHUNK_ASSETS, { chunks: chunks })
+            );
+          }
 
-        if (hasOptimizeAssetsProcessors) {
-          compilation.hooks.optimizeAssets.tapPromise(
-            this.pluginDescriptor,
-            assets => this.process(compilation, PHASES.OPTIMIZE_ASSETS, { assets: assets })
-          );
+          if (hasOptimizeAssetsProcessors) {
+            compilation.hooks.optimizeAssets.tapPromise(
+              this.pluginDescriptor,
+              assets => this.process(compilation, PHASES.OPTIMIZE_ASSETS, { assets: assets })
+            );
+          }
         }
-      }
-    );
-    compiler.hooks.emit.tapPromise(
-      this.pluginDescriptor,
-      compilation =>
-        (
-          hasEmitProcessors ?
-            this.process(compilation, PHASES.EMIT) :
-            Promise.resolve(undefined)
-        )
-        .then((result) => {
-          this.deleteAssets(compilation);
-          return result;
-        })
-    );
+      );
+      compiler.hooks.emit.tapPromise(
+        this.pluginDescriptor,
+        compilation =>
+          (
+            hasEmitProcessors ?
+              this.process(compilation, PHASES.EMIT) :
+              Promise.resolve(undefined)
+          )
+          .then((result) => {
+            this.deleteAssets(compilation);
+            return result;
+          })
+      );
+    }
   }
 }
 LastCallWebpackPlugin.PHASES = PHASES;
