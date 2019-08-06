@@ -4,7 +4,7 @@
   "author": "Nuno Rodrigues",
   "description": "A Webpack plugin that allows to transform \\ modify assets just before Webpack emits them.",
   "dependencies": {
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.12",
     "webpack-sources": "^1.1.0"
   },
   "main": "src/index.js",
