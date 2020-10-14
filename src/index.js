@@ -62,7 +62,7 @@ class LastCallWebpackPlugin {
   }
 
   buildPluginDescriptor() {
-    return { name: 'LastCallWebpackPlugin' };
+    return { name: 'LastCallWebpackPlugin', stage: compilation.PROCESS_ASSETS_STAGE_OPTIMIZE };
   }
 
   resetInternalState() {
