@@ -7,7 +7,9 @@ const isRegExp = require('lodash/isRegExp');
 const keys = require('lodash/keys');
 const values = require('lodash/values');
 const webpackSources = require('webpack-sources');
+const webpackVersion = require('webpack').version;
 
+const isWebpack4 = webpackVersion[0] === '4';
 const PHASES = {
   OPTIMIZE_CHUNK_ASSETS: 'compilation.optimize-chunk-assets',
   OPTIMIZE_ASSETS: 'compilation.optimize-assets',
@@ -172,8 +174,8 @@ class LastCallWebpackPlugin {
       (compilation, params) => {
         this.resetInternalState();
 
-        if (hasOptimizeChunkAssetsProcessors) {
-          compilation.hooks.processAssets.tapPromise(
+        if (hasOptimizeChunkAssetsProcessors && isWebpack4) {
+          compilation.hooks.optimizeChunkAssets.tapPromise(
             this.pluginDescriptor,
             chunks => this.process(compilation, PHASES.OPTIMIZE_CHUNK_ASSETS, { chunks: chunks })
           );
