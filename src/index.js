@@ -64,7 +64,13 @@ class LastCallWebpackPlugin {
   }
 
   buildPluginDescriptor() {
-    return { name: 'LastCallWebpackPlugin', stage: compilation.PROCESS_ASSETS_STAGE_OPTIMIZE };
+    const pluginDescriptor = { name: 'LastCallWebpackPlugin' };
+
+    if (webpackVersion[0] >= 5) {
+        pluginDescriptor.stage = compilation.PROCESS_ASSETS_STAGE_OPTIMIZE
+    }
+
+    return pluginDescriptor;
   }
 
   resetInternalState() {
