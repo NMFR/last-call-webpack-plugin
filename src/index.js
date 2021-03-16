@@ -7,7 +7,9 @@ const isRegExp = require('lodash/isRegExp');
 const keys = require('lodash/keys');
 const values = require('lodash/values');
 const webpackSources = require('webpack-sources');
+const webpackVersion = require('webpack').version;
 
+const isWebpackGreaterThan5 = webpackVersion[0] >= 5;
 const PHASES = {
   OPTIMIZE_CHUNK_ASSETS: 'compilation.optimize-chunk-assets',
   OPTIMIZE_ASSETS: 'compilation.optimize-assets',
@@ -62,7 +64,13 @@ class LastCallWebpackPlugin {
   }
 
   buildPluginDescriptor() {
-    return { name: 'LastCallWebpackPlugin' };
+    const pluginDescriptor = { name: 'LastCallWebpackPlugin' };
+
+    if (isWebpackGreaterThan5) {
+        pluginDescriptor.stage = compilation.PROCESS_ASSETS_STAGE_OPTIMIZE
+    }
+
+    return pluginDescriptor;
   }
 
   resetInternalState() {
@@ -172,7 +180,7 @@ class LastCallWebpackPlugin {
       (compilation, params) => {
         this.resetInternalState();
 
-        if (hasOptimizeChunkAssetsProcessors) {
+        if (hasOptimizeChunkAssetsProcessors && !isWebpackGreaterThan5) {
           compilation.hooks.optimizeChunkAssets.tapPromise(
             this.pluginDescriptor,
             chunks => this.process(compilation, PHASES.OPTIMIZE_CHUNK_ASSETS, { chunks: chunks })
