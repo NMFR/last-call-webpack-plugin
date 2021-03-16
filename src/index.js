@@ -9,7 +9,7 @@ const values = require('lodash/values');
 const webpackSources = require('webpack-sources');
 const webpackVersion = require('webpack').version;
 
-const isWebpackGreaterThen5 = webpackVersion[0] >= 5;
+const isWebpackGreaterThan5 = webpackVersion[0] >= 5;
 const PHASES = {
   OPTIMIZE_CHUNK_ASSETS: 'compilation.optimize-chunk-assets',
   OPTIMIZE_ASSETS: 'compilation.optimize-assets',
