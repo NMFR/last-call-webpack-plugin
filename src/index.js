@@ -180,7 +180,7 @@ class LastCallWebpackPlugin {
       (compilation, params) => {
         this.resetInternalState();
 
-        if (hasOptimizeChunkAssetsProcessors && !isWebpackGreaterThen5) {
+        if (hasOptimizeChunkAssetsProcessors && !isWebpackGreaterThan5) {
           compilation.hooks.optimizeChunkAssets.tapPromise(
             this.pluginDescriptor,
             chunks => this.process(compilation, PHASES.OPTIMIZE_CHUNK_ASSETS, { chunks: chunks })
