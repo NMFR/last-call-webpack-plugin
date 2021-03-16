@@ -66,7 +66,7 @@ class LastCallWebpackPlugin {
   buildPluginDescriptor() {
     const pluginDescriptor = { name: 'LastCallWebpackPlugin' };
 
-    if (isWebpackGreaterThen5) {
+    if (isWebpackGreaterThan5) {
         pluginDescriptor.stage = compilation.PROCESS_ASSETS_STAGE_OPTIMIZE
     }
 
